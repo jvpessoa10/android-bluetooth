@@ -1,23 +1,28 @@
 package com.jvpass.bluetoothexample
 
 import android.Manifest
+import android.app.Activity
+import android.bluetooth.BluetoothDevice
 import android.companion.CompanionDeviceManager
 import android.content.Intent
 import android.content.IntentSender
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.databinding.DataBindingUtil
 import com.jvpass.bluetoothexample.bluetooth.BluetoothContractor
 import com.jvpass.bluetoothexample.bluetooth.BluetoothManager
 import com.jvpass.bluetoothexample.bluetooth.BluetoothManager.Companion.ACTION_ENABLE_BLUETOOTH
 import com.jvpass.bluetoothexample.bluetooth.BluetoothPresenterImpl
+import com.jvpass.bluetoothexample.databinding.ActivityFindDeviceBinding
 
 class FindDeviceActivity : AppCompatActivity(), BluetoothContractor.BluetoothView {
 
     private companion object {
+        private const val TAG = "FindDeviceActivity"
         const val ENABLE_BT_REQUEST_CODE = 1000
-        const val REQUEST_FINE_LOCATION = 2000
         const val SELECT_DEVICE_REQUEST_CODE = 2000
     }
 
@@ -36,31 +41,34 @@ class FindDeviceActivity : AppCompatActivity(), BluetoothContractor.BluetoothVie
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_find_device)
+        Log.d(TAG, "onCreate")
+        val binding: ActivityFindDeviceBinding = DataBindingUtil.setContentView(
+            this,
+            R.layout.activity_find_device
+        )
+
+        binding.presenter = bluetoothPresenter
         bluetoothPresenter.onCreate()
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
-        if (requestCode == ENABLE_BT_REQUEST_CODE) {
-            when (requestCode) {
-                RESULT_OK -> bluetoothPresenter.onBluetoothEnabled()
+        when (requestCode) {
+            ENABLE_BT_REQUEST_CODE -> {
+                when (resultCode) {
+                    RESULT_OK -> bluetoothPresenter.onBluetoothEnabled()
+                }
             }
-        }
-    }
-
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray
-    ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-
-        if (requestCode == SELECT_DEVICE_REQUEST_CODE) {
-            if (grantResults.isNotEmpty()
-                && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                bluetoothPresenter.onBluetoothPermissionGranted()
+            SELECT_DEVICE_REQUEST_CODE -> {
+                when (resultCode) {
+                    RESULT_OK -> {
+                        val deviceToPair: BluetoothDevice =
+                                data?.getParcelableExtra(CompanionDeviceManager.EXTRA_DEVICE)
+                                        ?: return
+                        bluetoothPresenter.onDeviceSelected(deviceToPair)
+                    }
+                }
             }
         }
     }
@@ -72,17 +80,6 @@ class FindDeviceActivity : AppCompatActivity(), BluetoothContractor.BluetoothVie
     override fun requestEnableBluetooth() {
         val enableBtIntent = Intent(ACTION_ENABLE_BLUETOOTH)
         startActivityForResult(enableBtIntent, ENABLE_BT_REQUEST_CODE)
-    }
-
-    override fun requestBluetoothPermissions() {
-        if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION)
-            == PackageManager.PERMISSION_GRANTED) bluetoothPresenter.onBluetoothPermissionGranted()
-        else {
-            requestPermissions(
-                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
-                SELECT_DEVICE_REQUEST_CODE
-            )
-        }
     }
 
     override fun close() {

@@ -1,5 +1,8 @@
 package com.jvpass.bluetoothexample.bluetooth
 
+import android.bluetooth.BluetoothDevice
+import com.jvpass.bluetoothexample.LedDevice
+
 class BluetoothPresenterImpl (
     private val bluetoothView: BluetoothContractor.BluetoothView,
     private val bluetoothManager: BluetoothManager
@@ -14,14 +17,24 @@ class BluetoothPresenterImpl (
 
         if (!bluetoothManager.isBluetoothEnabled()) {
             bluetoothView.requestEnableBluetooth()
+        } else {
+            bluetoothManager.startScan(bluetoothView.deviceFoundCallback)
         }
     }
 
     override fun onBluetoothEnabled() {
-        bluetoothView.requestBluetoothPermissions()
+        bluetoothManager.startScan(bluetoothView.deviceFoundCallback)
     }
 
-    override fun onBluetoothPermissionGranted() {
-        bluetoothManager.startScan(bluetoothView.deviceFoundCallback)
+    override fun onDeviceSelected(device: BluetoothDevice) {
+        bluetoothManager.connect(device)
+    }
+
+    override fun onClickLedTurnOnBtn() {
+        bluetoothManager.write(LedDevice.LED_ON)
+    }
+
+    override fun onClickLedTurnOffBtn() {
+        bluetoothManager.write(LedDevice.LED_OFF)
     }
 }
