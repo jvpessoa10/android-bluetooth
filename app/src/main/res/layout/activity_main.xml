@@ -2,7 +2,7 @@
 <layout>
 
     <data>
-        <variable name="presenter" type="com.jvpass.bluetoothexample.bluetooth.BluetoothContractor.BluetoothPresenter"/>
+        <variable name="presenter" type="com.jvpass.bluetoothexample.ui.MainActivityContractor.Presenter"/>
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
@@ -10,7 +10,7 @@
         xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".FindDeviceActivity">
+        tools:context=".ui.MainActivity">
 
         <Button
             android:id="@+id/ledOnBtn"

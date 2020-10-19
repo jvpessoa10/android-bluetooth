@@ -1,10 +1,10 @@
-package com.jvpass.bluetoothexample.bluetooth
+package com.jvpass.bluetoothexample.ui
 
 import android.bluetooth.BluetoothDevice
 import android.companion.CompanionDeviceManager
 
-class BluetoothContractor {
-    interface BluetoothPresenter {
+class MainActivityContractor {
+    interface Presenter {
         fun onCreate()
         fun onBluetoothEnabled()
         fun onDeviceSelected(device: BluetoothDevice)
@@ -12,7 +12,7 @@ class BluetoothContractor {
         fun onClickLedTurnOffBtn()
     }
 
-    interface BluetoothView {
+    interface View {
         val deviceFoundCallback: CompanionDeviceManager.Callback
         fun displayBluetoothUnavailable()
         fun requestEnableBluetooth()
